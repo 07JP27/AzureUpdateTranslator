@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
+using AzureUpdateTranslator.Server.Models;
 using AzureUpdateTranslator.Share.Dtos;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
@@ -23,22 +24,13 @@ namespace AzureUpdateTranslator.Server
         }
 
         [FunctionName("ConvertToMDActivity")]
-        public async Task<string> SayHello([ActivityTrigger] RequestItem item, ILogger log)
+        public async Task<string> SayHello([ActivityTrigger] RequestItemDto item, ILogger log)
         {
-            var doc = default(IHtmlDocument);
-            using (var stream = await this._client.GetStreamAsync(new Uri(item.Url)))
-            {
-                // AngleSharp.Html.Parser.HtmlParserオブジェクトにHTMLをパースさせる
-                var parser = new HtmlParser();
-                doc = await parser.ParseDocumentAsync(stream);
-            }
+            log.LogInformation($"Converting:{item.Url}");
+            AzUpdateTopic topic = new AzUpdateTopic(item.Url, item.DoTranslate, this._client);
+            return await topic.GenerateMDAsync();
 
-            var title = doc.QuerySelector("#main > div > div:nth-child(2) > div.column.medium-8 > div.row.row-size2.column > h1");
-            var tags = doc.QuerySelector("ul.tags");
-            var body = doc.QuerySelector("#main > div > div:nth-child(2) > div.column.medium-8 > div.row.row-size2.row-divided > div > div:nth-child(1)");
-
-            log.LogInformation($"Saying hello to {item.Url}.");
-            return $"Hello {item.Url}!";
+            
         }
     }
 }

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace AzureUpdateTranslator.Share.Dtos
 {
-    public class RequestDto
+    public class CheckStatusResponseDto
     {
-        public List<RequestItemDto> Items { get; set; } = new List<RequestItemDto>();
+        public string Id { get; set; } = string.Empty;
+        public string StatusQueryGetUri { get; set; } = string.Empty;
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AzureUpdateTranslator.Share.Dtos
 {
-    public class RequestItem
+    public class RequestItemDto
     {
         public string Url { get; set; } = string.Empty;
         public bool DoTranslate { get; set; } = true;

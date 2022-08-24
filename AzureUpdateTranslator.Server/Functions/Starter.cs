@@ -15,7 +15,7 @@ namespace AzureUpdateTranslator.Server.Functions
 {
     public static class Starter
     {
-        [FunctionName("Starter")]
+        [FunctionName("starter")]
         public static async Task<HttpResponseMessage> HttpStart(
             [HttpTrigger(AuthorizationLevel.Anonymous,"post")] HttpRequestMessage req,
             [DurableClient] IDurableOrchestrationClient starter,
