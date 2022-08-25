@@ -22,13 +22,13 @@ namespace AzureUpdateTranslator.Server.Models
         private List<string> Tags;
         private string TopicUrl;
         private IHtmlCollection<IElement> Body;
-        private bool doTranslate;
+        private bool noTranslate;
 
-        public AzUpdateTopic(string url, bool doTranslate, HttpClient client)
+        public AzUpdateTopic(string url, bool noTranslate, HttpClient client)
         {
             this._client = client;
             this.TopicUrl = url;
-            this.doTranslate = doTranslate;
+            this.noTranslate = noTranslate;
         }
 
         public async Task<string> GenerateMDAsync()

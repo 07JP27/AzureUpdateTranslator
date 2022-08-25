@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AzureUpdateTranslator.Client": {
+      "commandName": "Project",
+      "commandLineArgs": "-f \"C:\\Users\\jtsuchida\\Desktop\\dojo-tools\\url.csv\""
+    }
+  }
+}

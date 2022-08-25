@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 using Microsoft.Azure.WebJobs;
 using AzureUpdateTranslator.Share.Dtos;
+using AzureUpdateTranslator.Server.Models;
 
 namespace AzureUpdateTranslator.Server.Functions
 {
@@ -18,9 +19,9 @@ namespace AzureUpdateTranslator.Server.Functions
             var input = context.GetInput<RequestDto>();
 
             var taskList = new List<Task<string>>();
-            foreach (var item in input.Items)
+            foreach (var url in input.Urls)
             {
-                taskList.Add(context.CallActivityAsync<string>("ConvertToMDActivity", item));
+                taskList.Add(context.CallActivityAsync<string>("ConvertToMDActivity", new ConvertToMDParam( url, input.NoTranslate)));
             }
 
             var list = (await Task.WhenAll(taskList)).ToList<string>();

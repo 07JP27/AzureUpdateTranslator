@@ -24,13 +24,11 @@ namespace AzureUpdateTranslator.Server
         }
 
         [FunctionName("ConvertToMDActivity")]
-        public async Task<string> SayHello([ActivityTrigger] RequestItemDto item, ILogger log)
+        public async Task<string> ConvertToMD([ActivityTrigger] ConvertToMDParam param, ILogger log)
         {
-            log.LogInformation($"Converting:{item.Url}");
-            AzUpdateTopic topic = new AzUpdateTopic(item.Url, item.DoTranslate, this._client);
+            log.LogInformation($"Converting:{param.Url}");
+            AzUpdateTopic topic = new AzUpdateTopic(param.Url, param.NoTranslate, this._client);
             return await topic.GenerateMDAsync();
-
-            
         }
     }
 }

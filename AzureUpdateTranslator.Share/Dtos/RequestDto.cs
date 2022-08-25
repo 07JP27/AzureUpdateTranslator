@@ -8,6 +8,7 @@ namespace AzureUpdateTranslator.Share.Dtos
 {
     public class RequestDto
     {
-        public List<RequestItemDto> Items { get; set; } = new List<RequestItemDto>();
+        public List<string> Urls { get; set; } = new List<string>();
+        public bool NoTranslate { get; set; } = false;
     }
 }
