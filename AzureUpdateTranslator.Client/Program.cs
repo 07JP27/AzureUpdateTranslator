@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Text;
+using AzureUpdateTranslator.Share.Constants;
 using AzureUpdateTranslator.Share.Dtos;
 using Newtonsoft.Json;
 
@@ -21,9 +21,15 @@ namespace AzureUpdateTranslator.Client
 
                 var inputFilePath = parsedOptions.Value.InputFile;
                 var noTranslation = parsedOptions.Value.NoTranslate;
+                var useCognitive = parsedOptions.Value.UseCognitive;
 
                 System.Console.WriteLine($"Target file: {inputFilePath}");
                 System.Console.WriteLine($"NoTranslate: {noTranslation}");
+                if(!noTranslation)
+                {
+                    var translatorLabel = useCognitive ? "Cognitive" : "DeepL";
+                    System.Console.WriteLine($"Translator:{translatorLabel}");
+                }
 
                 List<string> targetUrls = new List<string>();
 
@@ -42,6 +48,7 @@ namespace AzureUpdateTranslator.Client
                 var requestDto = new RequestDto();
                 requestDto.Urls = targetUrls;
                 requestDto.NoTranslate = noTranslation;
+                requestDto.Translator = useCognitive ? TranslatorOption.Cognitive : TranslatorOption.DeepL;
 
                 var client = new HttpClient();
                 var content = new StringContent(JsonConvert.SerializeObject(requestDto), Encoding.UTF8, "application/json");
@@ -70,7 +77,7 @@ namespace AzureUpdateTranslator.Client
                         foreach(var topic in status.Output)
                         {
                             await writer.WriteAsync(topic);
-                            await writer.WriteAsync("---");
+                            await writer.WriteAsync(Environment.NewLine + "---" + Environment.NewLine + Environment.NewLine);
                         }
                     }
 

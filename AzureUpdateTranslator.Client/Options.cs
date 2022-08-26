@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AzureUpdateTranslator.Client
+﻿namespace AzureUpdateTranslator.Client
 {
     public class Options
     {
@@ -17,6 +11,13 @@ namespace AzureUpdateTranslator.Client
 
         [CommandLine.Option('n', "no-translate", Required = false, HelpText = "Add if generate in original language.")]
         public bool NoTranslate
+        {
+            get;
+            set;
+        } = false;
+
+        [CommandLine.Option('c', "cognitive", Required = false, HelpText = "Add if use Cognitive service as translation engine.(Default engine:DeepL)")]
+        public bool UseCognitive
         {
             get;
             set;

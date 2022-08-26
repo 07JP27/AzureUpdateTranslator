@@ -7,14 +7,17 @@ using System.Threading.Tasks;
 using AngleSharp.Dom;
 using AngleSharp.Html.Dom;
 using AngleSharp.Html.Parser;
-using Google.Protobuf.WellKnownTypes;
-using ReverseMarkdown.Converters;
+using AzureUpdateTranslator.Server.Dtos;
+using AzureUpdateTranslator.Share.Constants;
+using DeepL;
+using Newtonsoft.Json;
 
 namespace AzureUpdateTranslator.Server.Models
 {
     public class AzUpdateTopic
     {
         private readonly HttpClient _client;
+        private readonly Translator _deepl;
         private readonly string ExclusionTags = Environment.GetEnvironmentVariable("ExclusionTags");
 
         private string Title;
@@ -23,12 +26,15 @@ namespace AzureUpdateTranslator.Server.Models
         private string TopicUrl;
         private IHtmlCollection<IElement> Body;
         private bool noTranslate;
+        private string translator;
 
-        public AzUpdateTopic(string url, bool noTranslate, HttpClient client)
+        public AzUpdateTopic(string url, bool noTranslate, string translator, HttpClient client, Translator deepl)
         {
             this._client = client;
+            this._deepl = deepl;
             this.TopicUrl = url;
             this.noTranslate = noTranslate;
+            this.translator = translator;
         }
 
         public async Task<string> GenerateMDAsync()
@@ -37,8 +43,8 @@ namespace AzureUpdateTranslator.Server.Models
             var parser = new HtmlParser();
             var doc = await parser.ParseDocumentAsync(stream);
             ParseHtml(doc);
-            var result =  GenerateResultMD();
-            return result;
+            var result =  GenerateResultMDAsync();
+            return await result;
         }
 
         private void ParseHtml(IHtmlDocument doc)
@@ -59,12 +65,12 @@ namespace AzureUpdateTranslator.Server.Models
             this.Body = bodyElm.Children;
         }
 
-        private string GenerateResultMD()
+        private async Task<string> GenerateResultMDAsync()
         {
             var converter = new ReverseMarkdown.Converter();
             var builder = new StringBuilder();
 
-            builder.Append($"## {this.Title}\r\n");
+            builder.Append($"## {await TranslateAsync(this.Title)}\r\n");
             builder.Append("* 対象\r\n");
             this.Tags.ForEach(x => builder.Append($"  * {x}\r\n"));
             builder.Append("\r\n<br/>\r\n\r\n");
@@ -77,18 +83,18 @@ namespace AzureUpdateTranslator.Server.Models
                     case "P":
                     case "H2":
                     case "DIV":
-                        builder.Append($"  * {converter.Convert(elm.InnerHtml)}\r\n");
+                        builder.Append($"  * {await TranslateAsync(converter.Convert(elm.InnerHtml))}\r\n");
                         break;
                     case "UL":
                         foreach(var child in elm.Children)
                         {
-                            builder.Append($"    * {converter.Convert(child.InnerHtml)}\r\n");
+                            builder.Append($"    * {await TranslateAsync(converter.Convert(child.InnerHtml))}\r\n");
                         };
                         break;
                     case "OL":
                         foreach (var child in elm.Children)
                         {
-                            builder.Append($"    1. {converter.Convert(child.InnerHtml)}\r\n");
+                            builder.Append($"    1. {await TranslateAsync(converter.Convert(child.InnerHtml))}\r\n");
                         };
                         break;
                     default:
@@ -103,6 +109,33 @@ namespace AzureUpdateTranslator.Server.Models
 
             
             return builder.ToString();
+        }
+
+        private async Task<string> TranslateAsync(string original)
+        {
+            if(this.noTranslate == true)
+            {
+                return original;
+            }
+
+            if (translator == TranslatorOption.Cognitive)
+            {
+                object[] body = new object[] { new { Text = original } };
+                var requestBody = JsonConvert.SerializeObject(body);
+
+                var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=en&to=ja");
+                request.Headers.Add("Ocp-Apim-Subscription-Key", Environment.GetEnvironmentVariable("CognitiveAuthKey"));
+                request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
+
+                var transResponse = await this._client.SendAsync(request);
+                var transResult = JsonConvert.DeserializeObject<List<TranslationsDto>>(await transResponse.Content.ReadAsStringAsync());
+                return transResult[0].Translations[0].Text;
+            }
+            else
+            {
+                var transResult = await this._deepl.TranslateTextAsync(original, LanguageCode.English, LanguageCode.Japanese);
+                return transResult.Text;
+            }   
         }
     }
 }

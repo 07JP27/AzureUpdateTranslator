@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Extensions.DurableTask;
-using Microsoft.Azure.WebJobs;
-using AzureUpdateTranslator.Share.Dtos;
 using AzureUpdateTranslator.Server.Models;
+using AzureUpdateTranslator.Share.Dtos;
+using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.DurableTask;
 
 namespace AzureUpdateTranslator.Server.Functions
 {
@@ -21,7 +19,7 @@ namespace AzureUpdateTranslator.Server.Functions
             var taskList = new List<Task<string>>();
             foreach (var url in input.Urls)
             {
-                taskList.Add(context.CallActivityAsync<string>("ConvertToMDActivity", new ConvertToMDParam( url, input.NoTranslate)));
+                taskList.Add(context.CallActivityAsync<string>("ConvertToMDActivity", new ConvertToMDParam( url, input.NoTranslate, input.Translator)));
             }
 
             var list = (await Task.WhenAll(taskList)).ToList<string>();
