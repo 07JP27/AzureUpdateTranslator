@@ -39,7 +39,7 @@ Currentrly, distination language is Japanese only. (Welcome multi-language suppo
     ### Args
     - `-f "xxx.cxv"` / `--file "xxx.cxv"` : **Required**. Path to URLs file.
     - `-c` / `--cognitive` : Using Azure Cognitive translation service instead of DeepL.
-    - `-n` / `--no-translate` : No translate pnly curate. 
+    - `-n` / `--no-translate` : No translate only curate. 
    
     \* No translation. when you use `-c ` and  `-n`  simultaneously, 
 
