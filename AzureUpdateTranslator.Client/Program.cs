@@ -90,7 +90,7 @@ namespace AzureUpdateTranslator.Client
                
             }
 
-            System.Console.ReadKey();
+            //System.Console.ReadKey();
         }
     }
 }
