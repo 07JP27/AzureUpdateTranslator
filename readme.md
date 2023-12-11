@@ -20,10 +20,36 @@ Currentrly, distination language is Japanese only. (Welcome multi-language suppo
     - **The Azure Cognitive Services Translator's regsion should set `global`.** (Specific regions are not supported currently)
     - If it is guaranteed that only one service will be used, there is no need to create both resources. (The environment variable is registered with an empty string.)
 1. Publish AzureUpdateTranslator.Server project to  Azure Functions.
+    1. Move to the directory where you cloned the sample code.
+        ```
+        cd /path/to/AzureUpdateTranslator/AzureUpdateTranslator.Server
+        ```
+    2. Log in to Azure.
+        ```
+        az login
+        ```
+    3. Create a resource group in any region. You can name the resource group whatever you like.
+        ```
+        az group create --name <resource group name> --location <region>
+        ```
+    4. Within the resource group and region you created in step 3, create a Blob Storage. You can name the storage account whatever you like.
+        ```
+        az storage account create --name <storage account name> --resource-group <resource group name> --location <region> --sku Standard_LRS --allow-blob-public-access false
+        ```
+    5. Create a function app in Azure. You can name the function app whatever you like.
+        ```
+        az functionapp create --resource-group <resource group name> --consumption-plan-location <region> --runtime dotnet --functions-version 4 --name <function app name> --storage-account <storage account name>
+        ```
+    6. Deploy the function to Azure.
+        ```
+        func azure functionapp publish <function app name>
+        ```
+
 1. Set Azure Functions environment variable.
     - ExclusionTags : Exclusion tags e.g. `Features,Services`
     - DeeplAuthKey : DeepL API auth key.
     - CognitiveAuthKey : Azure Cognitive Services Translation subscription key.
+    - FUNCTIONS_WORKER_RUNTIME : `dotnet`
 1. Set Azure Functions endpoint URL to [AzureUpdateTranslator.Client code](https://github.com/07JP27/AzureUpdateTranslator/blob/eebd94a58ad77f13785869c00e550c9d4b4d5c08/AzureUpdateTranslator.Client/Program.cs#L12).
 1. Bluild AzureUpdateTranslator.Client project.
 
